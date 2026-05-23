@@ -1,0 +1,88 @@
+# render.yaml — place this in the ROOT of your HealthCare repo
+# Render reads this file and deploys both services automatically.
+# Docs: https://render.com/docs/blueprint-spec
+
+services:
+
+  # ── Backend (Node.js + WebSocket) ───────────────────────────
+  - type: web
+    name: naturaheal-api
+    runtime: node
+    rootDir: backend
+    buildCommand: npm install
+    startCommand: npm start
+    plan: free          # upgrade to starter for always-on
+    healthCheckPath: /health
+
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000           # Render sets PORT automatically; this is a fallback
+
+      # ── Paste your real values in the Render dashboard ──────
+      - key: CLIENT_URL
+        value: https://naturaheal.onrender.com   # your frontend URL on Render
+
+      - key: SUPABASE_URL
+        sync: false            # set manually in dashboard
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+
+      - key: ADMIN_EMAIL
+        sync: false
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+
+      - key: CLOUDINARY_CLOUD_NAME
+        sync: false
+      - key: CLOUDINARY_API_KEY
+        sync: false
+      - key: CLOUDINARY_API_SECRET
+        sync: false
+
+      - key: TWILIO_ACCOUNT_SID
+        sync: false
+      - key: TWILIO_AUTH_TOKEN
+        sync: false
+      - key: TWILIO_PHONE_NUMBER
+        sync: false
+      - key: TWILIO_VERIFY_SERVICE_SID
+        sync: false
+      - key: NOTIFICATION_PHONE
+        sync: false
+
+      - key: RAZORPAY_KEY_ID
+        sync: false
+      - key: RAZORPAY_KEY_SECRET
+        sync: false
+
+      - key: GEMINI_API_KEY
+        sync: false
+
+  # ── Frontend (Vite static site) ──────────────────────────────
+  - type: web
+    name: naturaheal
+    runtime: static
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    staticPublishPath: dist
+    pullRequestPreviewsEnabled: false
+
+    # SPA fallback: all routes serve index.html
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+
+    envVars:
+      - key: VITE_SUPABASE_URL
+        sync: false
+      - key: VITE_SUPABASE_ANON_KEY
+        sync: false
+      - key: VITE_API_URL
+        value: https://naturaheal-api.onrender.com   # your backend URL
+      - key: VITE_RAZORPAY_KEY_ID
+        sync: false
